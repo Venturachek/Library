@@ -7,3 +7,4 @@ celerybeat-schedule.db
 celerybeat.pid
 celerybeat-schedule-shm
 celerybeat-schedule-wal
+.idea
