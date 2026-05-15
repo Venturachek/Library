@@ -1,0 +1,12 @@
+[
+  {"title": "1984", "author": "George Orwell", "genre": "fiction", "price": 3},
+  {"title": "Brave New World", "author": "Aldous Huxley", "genre": "fiction", "price": 2},
+  {"title": "Dune", "author": "Frank Herbert", "genre": "fiction", "price": 4},
+  {"title": "The Shining", "author": "Stephen King", "genre": "horror", "price": 3},
+  {"title": "It", "author": "Stephen King", "genre": "horror", "price": 4},
+  {"title": "A Brief History of Time", "author": "Stephen Hawking", "genre": "science", "price": 3},
+  {"title": "Sherlock Holmes", "author": "Arthur Conan Doyle", "genre": "detective", "price": 2},
+  {"title": "And Then There Were None", "author": "Agatha Christie", "genre": "detective", "price": 2},
+  {"title": "Sapiens", "author": "Yuval Noah Harari", "genre": "non-fiction", "price": 3},
+  {"title": "The Great Gatsby", "author": "F. Scott Fitzgerald", "genre": "fiction", "price": 2}
+]
