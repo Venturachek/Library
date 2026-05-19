@@ -18,3 +18,14 @@ class BookNotFound(LoanException):
 class UserAlreadyExistsException(LoanException):
     detail = "User Already Exists"
 
+class BookNotAvailableException(LoanException):
+    detail = "Book not available"
+
+class UserNotFoundException(LoanException):
+    detail = "User Not Found"
+
+class IncorrectUserDataException(LoanException):
+    detail = "Incorrect User Data"
+
+class BookIsLoanedException(LoanException):
+    detail = "Book is Loaned"

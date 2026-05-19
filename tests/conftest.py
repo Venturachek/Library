@@ -2,7 +2,10 @@ import json
 from typing import AsyncGenerator
 
 import pytest
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.inmemory import InMemoryBackend
 from httpx import AsyncClient, ASGITransport
+from unittest import mock
 
 from src.api.Dependencies import get_db
 from src.config import settings
@@ -30,6 +33,7 @@ app.dependency_overrides[get_db] = get_db_null_pull
 @pytest.fixture(scope="session", autouse=True)
 async def async_main():
     assert settings.MODE == "TEST"
+    FastAPICache.init(InMemoryBackend())
     async with engine_null_pull.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)

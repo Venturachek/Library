@@ -4,24 +4,19 @@ from src.models.book import BooksOrm
 from src.models.loan import LoanOrm
 from src.repositories.Base import BaseRepository
 from src.repositories.Mapper.mappers import LoanDataMapper
-from sqlalchemy import insert, select, delete, update
-
-from src.schemas.books import PATCHBook, AvailabilityBook
-from src.schemas.loan import ReturnLoan
+from sqlalchemy import select, update
 
 
 class LoanRepository(BaseRepository):
     model = LoanOrm
     mapper = LoanDataMapper
 
-    async def returning_book(self, loan_id: int):
-        query = select(LoanOrm.book_id).where(LoanOrm.id == loan_id)
-        res = await self.session.execute(query)
-        book = res.scalar_one()
-        book_data = AvailabilityBook(availability=True, available_from=None)
-        patch_stmt = update(BooksOrm).filter_by(id=book).values(**book_data.model_dump(exclude_unset=True))
-        await self.session.execute(patch_stmt)
-        loan_data = ReturnLoan(returned=True)
-        patch_loan_stmt = update(LoanOrm).filter_by(id=loan_id).values(**loan_data.model_dump(exclude_unset=True))
-        await self.session.execute(patch_loan_stmt)
+    async def return_loan(self, loan_id: int):
+        stmt = update(LoanOrm).filter_by(id=loan_id).values(returned=True)
+        await self.session.execute(stmt)
 
+    async def get_book_id_by_loan(self, loan_id: int) -> int:
+        res = await self.session.execute(
+            select(LoanOrm.book_id).where(LoanOrm.id == loan_id)
+        )
+        return res.scalar_one()

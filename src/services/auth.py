@@ -2,11 +2,14 @@ from datetime import timedelta, timezone, datetime
 import jwt
 from fastapi import HTTPException
 from passlib.context import CryptContext
-
 from src.config import  settings
+from src.exceptions import ObjectNotFoundException, UserNotFoundException, IncorrectUserDataException
+from src.models.user import Role
+from src.schemas.user import UserAddRequest, UserAdd
+from src.services.base import BaseService
 
 
-class Auth:
+class Auth(BaseService):
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
     def create_access_token(self, data: dict, expires_delta: timedelta | None = None):
@@ -32,5 +35,21 @@ class Auth:
             tok = jwt.decode(token, settings.JWT_KEY, algorithms=settings.ALGORITHM)
         except jwt.exceptions.DecodeError:
             raise HTTPException(status_code=401, detail="Could not validate credentials")
+        except jwt.exceptions.ExpiredSignatureError:
+            raise HTTPException(status_code=401, detail="Credentials expired")
         return tok
-        
+
+    async def add_user(self, data: UserAddRequest):
+        hashed_password = self.get_password_hash(data.password)
+        new_user = UserAdd(email=data.email, hashed_password=hashed_password, role=Role.USER)
+        await self.db.user.add(new_user)
+        await self.db.commit()
+
+    async def login_user(self, data: UserAddRequest):
+        try:
+            user = await self.db.user.get_user_by_email(email=data.email)
+        except ObjectNotFoundException:
+            raise UserNotFoundException
+        if not self.verify_password(plain_password=data.password, hashed_password=user.hashed_password):
+            raise IncorrectUserDataException
+        return self.create_access_token({"user_id": user.id})

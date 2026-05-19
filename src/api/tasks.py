@@ -1,5 +1,5 @@
+import logging
 from fastapi import APIRouter, Depends
-
 from src.api.Dependencies import get_role
 from src.models.user import Role
 from src.task.tasks import send_reminder
@@ -11,6 +11,6 @@ def reminder():
     try:
         send_reminder.delay()
     except Exception as e:
-        print(e)
+        logging.info(e)
     return {"message": "reminder sent"}
 

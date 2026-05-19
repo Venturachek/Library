@@ -1,4 +1,3 @@
-from src.services.auth import Auth
 import pytest
 
 @pytest.mark.parametrize("email, password", [

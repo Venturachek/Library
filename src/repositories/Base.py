@@ -1,11 +1,11 @@
 import logging
 
-from asyncpg import UniqueViolationError
+from asyncpg import UniqueViolationError, ForeignKeyViolationError
 from pydantic import BaseModel
 from sqlalchemy import insert, update, delete, select
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, NoResultFound
 
-from src.exceptions import ObjectNotFoundException, ObjectAlreadyExistsException
+from src.exceptions import ObjectNotFoundException, ObjectAlreadyExistsException, BookIsLoanedException
 from src.repositories.Mapper.base import DataMapper
 
 
@@ -18,20 +18,17 @@ class BaseRepository:
 
 
     async def get_all(self):
-        try:
-            query = select(self.model)
-            res = await self.session.execute(query)
-        except ObjectNotFoundException:
-            raise ObjectNotFoundException
+        query = select(self.model)
+        res = await self.session.execute(query)
         return [self.mapper.map_to_domain(model) for model in res.scalars().all()]
 
     async def get_filter_by(self, **filter_by):
         try:
             query = select(self.model).filter_by(**filter_by)
             res = await self.session.execute(query)
-        except ObjectNotFoundException:
+            result = res.scalars().one()
+        except NoResultFound:
             raise ObjectNotFoundException
-        result = res.scalars().one()
         return self.mapper.map_to_domain(result)
 
 
@@ -73,8 +70,14 @@ class BaseRepository:
         try:
             delete_stmt = delete(self.model).filter_by(**filter_by)
             await self.session.execute(delete_stmt)
-        except ObjectNotFoundException:
+        except NoResultFound:
             raise ObjectNotFoundException
+        except IntegrityError as ex:
+            if isinstance(ex.orig.__cause__, ForeignKeyViolationError):
+                raise BookIsLoanedException from ex
+            else:
+                raise ex
+
 
     async def patch(self, data: BaseModel, **filter_by):
         patch_stmt = update(self.model).values(**data.model_dump(exclude_unset=True)).filter_by(**filter_by).returning(self.model)

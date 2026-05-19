@@ -1,9 +1,6 @@
-import asyncio
 from typing import Annotated
-
 from fastapi import Depends, Query, HTTPException, Request
 from pydantic import BaseModel
-
 from src.database import async_session_maker
 from src.models.user import Role
 from src.services.auth import Auth
