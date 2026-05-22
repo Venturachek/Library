@@ -11,7 +11,7 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 async def register(db: DBDep, data: UserAddRequest):
     try:
         await Auth(db).add_user(data)
-    except ObjectAlreadyExistsException as e:
+    except ObjectAlreadyExistsException:
         raise HTTPException(status_code=409, detail="User already exists!")
     return {"status": "ok"}
 

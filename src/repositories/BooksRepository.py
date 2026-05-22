@@ -1,6 +1,4 @@
 from sqlalchemy import func, select
-
-from src.exceptions import BookNotFound
 from src.models.book import BooksOrm, Genre
 from src.repositories.Base import BaseRepository
 from src.repositories.Mapper.mappers import BooksDataMapper

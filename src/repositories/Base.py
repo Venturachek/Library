@@ -26,6 +26,15 @@ class BaseRepository:
         try:
             query = select(self.model).filter_by(**filter_by)
             res = await self.session.execute(query)
+            result = res.scalars().all()
+        except NoResultFound:
+            raise ObjectNotFoundException
+        return [self.mapper.map_to_domain(model) for model in result]
+
+    async def get_one(self, **filter_by):
+        try:
+            query = select(self.model).filter_by(**filter_by)
+            res = await self.session.execute(query)
             result = res.scalars().one()
         except NoResultFound:
             raise ObjectNotFoundException

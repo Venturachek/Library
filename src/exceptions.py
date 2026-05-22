@@ -29,3 +29,6 @@ class IncorrectUserDataException(LoanException):
 
 class BookIsLoanedException(LoanException):
     detail = "Book is Loaned"
+
+class LoanNotFound(LoanException):
+    detail = "Loan Not Found"

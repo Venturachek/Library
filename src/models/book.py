@@ -1,9 +1,7 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 import enum
-
 from sqlalchemy import String, Boolean, true, DateTime, Integer, Enum
 from sqlalchemy.orm import mapped_column, Mapped
-from src.models.utils import two_weeks_from_now
 from src.database import Base
 
 class Genre(str, enum.Enum):

@@ -23,6 +23,10 @@ class Settings(BaseSettings):
     AWS_REGION: str
     SES_EMAIL_FROM: str
 
+    TG_ACCESS_TOKEN: str
+
+    AI_API_KEY: str
+
     @property
     def redis_url(self):
         return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}"

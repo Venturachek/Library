@@ -7,28 +7,6 @@ from src.services.auth import Auth
 from src.utils.dbmanager import DBManager
 
 
-def get_token(request: Request):
-    token = request.cookies.get("access_token", None)
-    if token is None:
-        raise HTTPException(status_code=401, detail="Access Token is required")
-    return token
-
-def get_current_user(token: str = Depends(get_token)):
-    data = Auth().decode_token(token)
-    return data["user_id"]
-
-async def get_user_by_id(user_id: int = Depends(get_current_user)):
-    async with DBManager(session_factory=async_session_maker) as db:
-        return await db.user.get_filter_by(id=user_id)
-
-def get_role(role: Role):
-    def checker(user = Depends(get_user_by_id)):
-        if user.role != role:
-            raise HTTPException(status_code=403, detail="You do not have permission to perform this action")
-        return user
-    return checker
-
-UserIDDep = Annotated[int, Depends(get_current_user)]
 
 
 class PaginationParams(BaseModel):
@@ -43,3 +21,25 @@ async def get_db():
         yield db
 
 DBDep = Annotated[DBManager, Depends(get_db)]
+
+def get_token(request: Request):
+    token = request.cookies.get("access_token", None)
+    if token is None:
+        raise HTTPException(status_code=401, detail="Access Token is required")
+    return token
+
+def get_current_user(token: str = Depends(get_token)):
+    data = Auth().decode_token(token)
+    return data["user_id"]
+
+async def get_user_by_id(db: DBDep, user_id: int = Depends(get_current_user)):
+    return await db.user.get_one(id=user_id)
+
+def get_role(role: Role):
+    def checker(user = Depends(get_user_by_id)):
+        if user.role != role:
+            raise HTTPException(status_code=403, detail="You do not have permission to perform this action")
+        return user
+    return checker
+
+UserIDDep = Annotated[int, Depends(get_current_user)]

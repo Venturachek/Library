@@ -13,7 +13,6 @@ class BooksService(BaseService):
             title: str | None = Query(None),
             author: str | None = Query(None),
             genre: Genre | None = Query(None),
-
     ):
         per_page = pag.per_page or 5
         try:

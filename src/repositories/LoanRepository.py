@@ -1,6 +1,5 @@
-from pydantic import BaseModel
-
-from src.models.book import BooksOrm
+from sqlalchemy.exc import NoResultFound
+from src.exceptions import ObjectNotFoundException
 from src.models.loan import LoanOrm
 from src.repositories.Base import BaseRepository
 from src.repositories.Mapper.mappers import LoanDataMapper
@@ -12,11 +11,17 @@ class LoanRepository(BaseRepository):
     mapper = LoanDataMapper
 
     async def return_loan(self, loan_id: int):
-        stmt = update(LoanOrm).filter_by(id=loan_id).values(returned=True)
-        await self.session.execute(stmt)
-
+        try:
+            stmt = update(LoanOrm).filter_by(id=loan_id).values(returned=True)
+            await self.session.execute(stmt)
+        except NoResultFound:
+            raise ObjectNotFoundException
     async def get_book_id_by_loan(self, loan_id: int) -> int:
-        res = await self.session.execute(
+        try:
+            res = await self.session.execute(
             select(LoanOrm.book_id).where(LoanOrm.id == loan_id)
         )
+        except NoResultFound:
+            raise ObjectNotFoundException
+
         return res.scalar_one()

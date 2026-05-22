@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 
 from src.api.Dependencies import UserIDDep
-from src.exceptions import ObjectNotFoundException, BookNotFound, BookNotAvailableException
+from src.exceptions import ObjectNotFoundException, BookNotFound, BookNotAvailableException, LoanNotFound
 from src.models.utils import two_weeks_from_now
 from src.schemas.books import AvailabilityBook
 from src.schemas.loan import Loan, AddLoan
@@ -24,9 +24,18 @@ class LoansService(BaseService):
         await self.db.commit()
         return loan_data
 
-    async def return_loan(self, loan_id: int):
-        book_id = await self.db.loan.get_book_id_by_loan(loan_id)
-
+    async def return_book(self, loan_id: int):
+        try:
+            book_id = await self.db.loan.get_book_id_by_loan(loan_id)
+        except ObjectNotFoundException:
+            raise LoanNotFound
         await self.db.books.patch(id=book_id, data=AvailabilityBook(availability=True, available_from=None))
         await self.db.loan.return_loan(loan_id=loan_id)
         await self.db.commit()
+
+    async def get_loan(self, user: UserIDDep):
+        try:
+            loan_data = await self.db.loan.get_filter_by(user_id=user)
+        except ObjectNotFoundException:
+            raise LoanNotFound
+        return loan_data
