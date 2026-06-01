@@ -2,9 +2,11 @@ from datetime import timedelta, timezone, datetime
 import jwt
 from fastapi import HTTPException
 from passlib.context import CryptContext
-from src.config import  settings
+from src.config import settings
 from src.exceptions import ObjectNotFoundException, UserNotFoundException, IncorrectUserDataException
 from src.models.user import Role
+from src.repositories.utils import generate_code
+from src.schemas.telegram_link import AddTelegramLink
 from src.schemas.user import UserAddRequest, UserAdd
 from src.services.base import BaseService
 
@@ -53,3 +55,10 @@ class Auth(BaseService):
         if not self.verify_password(plain_password=data.password, hashed_password=user.hashed_password):
             raise IncorrectUserDataException
         return self.create_access_token({"user_id": user.id})
+
+    async def telegram_link(self, user: int):
+        code = generate_code()
+        data = AddTelegramLink(code=code, user_id=user)
+        await self.db.tg.add(data)
+        await self.db.commit()
+        return code

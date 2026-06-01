@@ -1,5 +1,8 @@
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
+from sqlalchemy.exc import NoResultFound
+from src.exceptions import BookNotFound, BookNotAvailableException
 from src.models.book import BooksOrm, Genre
+from src.models.utils import two_weeks_from_now
 from src.repositories.Base import BaseRepository
 from src.repositories.Mapper.mappers import BooksDataMapper
 
@@ -27,3 +30,16 @@ class BooksRepository(BaseRepository):
         result = await self.session.execute(query)
 
         return [self.mapper.map_to_domain(book) for book in result.scalars().all()]
+
+    async def try_reserve_book(self, book_id):
+        query = (update(self.model)
+                 .filter_by(id=book_id)
+                 .where(BooksOrm.availability==True)
+                 .values(availability=False, available_from=two_weeks_from_now())
+                 .returning(BooksOrm)
+                 )
+        result = await self.session.execute(query)
+        res = result.scalars().one_or_none()
+        if res is None:
+            raise BookNotAvailableException
+        return self.mapper.map_to_domain(res)

@@ -129,17 +129,17 @@ http://localhost:8000/docs
 
 ### Main Endpoints
 
-| Method | Endpoint | Description | Access |
-|---|---|---|---|
-| POST | `/auth/register` | Register new user | Public |
-| POST | `/auth/login` | Login | Public |
-| GET | `/books` | Get all books | Authorized |
-| POST | `/books` | Add book | Admin |
-| POST | `/books/bulk` | Bulk add books | Admin |
-| PATCH | `/books/{id}` | Update book | Admin |
-| DELETE | `/books/{id}` | Delete book | Admin |
+| Method | Endpoint | Description | Access     |
+|---|---|---|------------|
+| POST | `/auth/register` | Register new user | Public     |
+| POST | `/auth/login` | Login | Public     |
+| GET | `/books` | Get all books | Public     |
+| POST | `/books` | Add book | Admin      |
+| POST | `/books/bulk` | Bulk add books | Admin      |
+| PATCH | `/books/{id}` | Update book | Admin      |
+| DELETE | `/books/{id}` | Delete book | Admin      |
 | POST | `/loan/{book_id}` | Borrow book | Authorized |
-| POST | `/loan/{loan_id}/return` | Return book | Admin |
+| POST | `/loan/{loan_id}/return` | Return book | Admin      |
 
 ---
 

@@ -1,7 +1,5 @@
-from src.api.Dependencies import PaginationParams
 from src.database import async_session_maker
 from src.models.book import Genre
-from src.services.books import BooksService
 from src.utils.dbmanager import DBManager
 
 
@@ -23,7 +21,8 @@ async def search_books(
             {
                 "title": b.title,
                 "author": b.author,
-                "genre": b.genre
+                "genre": b.genre,
+                "price": b.price,
             }
             for b in books
             ]

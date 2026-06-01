@@ -1,7 +1,8 @@
+import logging
+from celery.schedules import crontab
 from src.task.celery_app import celery_instance
 from src.repositories.utils import get_emails
 from src.services.email import EmailService
-import logging
 
 email_service = EmailService()
 
@@ -26,4 +27,11 @@ def send_reminder():
             message=f"Please return {title} tomorrow"
         )
 
+
+celery_instance.conf.beat_schedule = {
+    "send-daily-reminders": {
+        "task": "src.task.tasks.send_reminder",
+        "schedule": crontab(hour=9, minute=0)
+    }
+}
 

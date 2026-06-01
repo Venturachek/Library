@@ -1,54 +1,64 @@
 import json
-
+import redis.asyncio as redis
 from src.ai.ai_client import client
 from src.ai.registry import TOOLS_MAP
 from src.ai.tools_schema import BOOK_TOOLS
+from src.config import settings
+
 
 SYSTEM_PROMPT = """
 YOU ARE LIBRARY ASSISTANT. USE TOOLS WHEN NEEDED
 """
-
+r = redis.from_url(settings.redis_url)
 class AIOrchestrator:
+    def __init__(self, tg_id: int):
+        self.tg_id = tg_id
+        self.key = f"chat:{tg_id}"
+
+    async def get_messages(self) -> list:
+        data = await r.get(self.key)
+        if not data:
+            return [{"role": "system", "content": SYSTEM_PROMPT}]
+        return json.loads(data)
+
+    async def save_messages(self, messages: list):
+        await r.set(self.key, json.dumps(messages, ensure_ascii=False), ex=60*60*24)
+
     async def ask(self, text: str):
-        messages = [
-            {
-                "role": "system",
-                "content": SYSTEM_PROMPT
-            },
-            {
-                "role": "user",
-                "content": text
-            }
-        ]
-        response = await client.chat.completions.create(
-            model="z-ai/glm-4.5-air:free",
-            messages=messages,
-            tools=BOOK_TOOLS,
-            tool_choice="auto"
-        )
+        messages = await self.get_messages()
+        messages.append({"role": "user", "content": text})
 
-        message = response.choices[0].message
+        while True:
+            response = await client.chat.completions.create(
+                model="z-ai/glm-4.5-air:free",
+                messages=messages,
+                tools=BOOK_TOOLS,
+                tool_choice="auto"
+            )
 
-        if not message.tool_calls:
-            return message.content
+            message = response.choices[0].message
 
-        tool_call = message.tool_calls[0]
-        function_name = tool_call.function.name
-        arguments = json.loads(tool_call.function.arguments)
+            if not message.tool_calls:
+                messages.append({"role": "assistant", "content": message.content})
+                await self.save_messages(messages)
+                return message.content
 
-        result = await TOOLS_MAP[function_name](**arguments)
+            messages.append(message.model_dump())
 
-        messages.append(message)
-        messages.append({
-            "role": "tool",
-            "tool_call_id": tool_call.id,
-            "content": json.dumps(result)
-        })
+            for tool_call in message.tool_calls:
+                function_name = tool_call.function.name
+                arguments = json.loads(tool_call.function.arguments)
 
-        final_response = await client.chat.completions.create(
-            model="z-ai/glm-4.5-air:free",
-            messages=messages
-        )
-        return final_response.choices[0].message.content
+                try:
+                    result = await TOOLS_MAP[function_name](**arguments)
+                except Exception as e:
+                    result = {"error": str(e)}
 
-orchestrator = AIOrchestrator()
+                messages.append({
+                    "role": "tool",
+                    "tool_call_id": tool_call.id,
+                    "content": json.dumps(result, ensure_ascii=False)
+                })
+
+def get_orchestrator(tg_id: int) -> AIOrchestrator:
+    return AIOrchestrator(tg_id)

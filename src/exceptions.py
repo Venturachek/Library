@@ -32,3 +32,12 @@ class BookIsLoanedException(LoanException):
 
 class LoanNotFound(LoanException):
     detail = "Loan Not Found"
+
+class CodeExpiredException(LoanException):
+    detail = "Code Expired"
+
+class NoSuchCodeException(LoanException):
+    detail = "No such code"
+
+class CodeAlreadyUsedException(LoanException):
+    detail = "Code Already Used"

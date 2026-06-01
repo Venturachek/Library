@@ -1,4 +1,16 @@
 services:
+  library_bot_service:
+    container_name: 'library_bot'
+    build:
+      context: .
+    networks:
+      - myNetwork
+    env_file:
+      - .env
+    command: "python bot/main.py"
+    depends_on:
+      - library_back_service
+
   library_back_service:
     container_name: 'library_back'
     build:

@@ -3,9 +3,10 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from sqlalchemy import pool
 from alembic import context
 import asyncio
-from src.models.book import BooksOrm
+from src.models.telegram_link import TelegramLink
 from src.models.user import UserOrm
 from src.models.loan import LoanOrm
+from src.models.book import BooksOrm
 from src.config import settings
 from src.database import Base
 

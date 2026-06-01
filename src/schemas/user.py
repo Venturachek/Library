@@ -22,3 +22,6 @@ class UserHashedPassword(User):
 
 class UserRole(BaseModel):
     role: Role
+
+class UserTelegramLink(BaseModel):
+    telegram_id: int

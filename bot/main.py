@@ -5,15 +5,18 @@ from pathlib import Path
 
 from aiogram import Bot, Dispatcher
 
-
 sys.path.append(str(Path(__file__).parent.parent))
 
-from bot.handlers import router
+from src.database import async_session_maker
 from src.config import settings
+from bot.app.handlers import router
+from bot.middleware import DbMiddleware
+
 
 bot = Bot(token=settings.TG_ACCESS_TOKEN)
 dp = Dispatcher()
 
+dp.update.middleware(DbMiddleware(session_factory=async_session_maker))
 
 async def main():
     dp.include_router(router)

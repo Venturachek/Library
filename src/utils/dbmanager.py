@@ -1,4 +1,5 @@
 from src.repositories.LoanRepository import LoanRepository
+from src.repositories.TelegramRepository import TelegramRepository
 from src.repositories.UserRepository import UserRepository
 from src.repositories.BooksRepository import BooksRepository
 
@@ -13,6 +14,7 @@ class DBManager:
         self.books = BooksRepository(self.session)
         self.user = UserRepository(self.session)
         self.loan = LoanRepository(self.session)
+        self.tg = TelegramRepository(self.session)
 
         return self
 

@@ -1,5 +1,7 @@
 from src.models.book import BooksOrm
 from src.models.loan import LoanOrm
+from src.models.telegram_link import TelegramLink as TelegramLinkOrm
+from src.schemas.telegram_link import TelegramLink
 from src.models.user import UserOrm
 from src.repositories.Mapper.base import DataMapper
 from src.schemas.books import Book
@@ -18,3 +20,8 @@ class UserDataMapper(DataMapper):
 class LoanDataMapper(DataMapper):
     model = LoanOrm
     schema = Loan
+
+class TelegramLinkDataMapper(DataMapper):
+    model = TelegramLinkOrm
+    schema = TelegramLink
+

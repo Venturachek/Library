@@ -21,3 +21,4 @@ class UserRepository(BaseRepository):
         except NoResultFound:
             raise ObjectNotFoundException
         return UserHashedPassword.model_validate(res, from_attributes=True)
+
