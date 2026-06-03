@@ -1,12 +1,9 @@
 import json
 from typing import AsyncGenerator
-
 import pytest
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.inmemory import InMemoryBackend
 from httpx import AsyncClient, ASGITransport
-from unittest import mock
-
 from src.api.Dependencies import get_db
 from src.config import settings
 from src.main import app

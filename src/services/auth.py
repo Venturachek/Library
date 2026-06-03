@@ -1,15 +1,17 @@
 from datetime import timedelta, timezone, datetime
 import jwt
 from fastapi import HTTPException
+from jwt import DecodeError, ExpiredSignatureError
 from passlib.context import CryptContext
 from src.config import settings
-from src.exceptions import ObjectNotFoundException, UserNotFoundException, IncorrectUserDataException
+from src.exceptions import ObjectNotFoundException, UserNotFoundException, IncorrectUserDataException, NoRefreshToken, \
+    InvalidTokenException
 from src.models.user import Role
 from src.repositories.utils import generate_code
 from src.schemas.telegram_link import AddTelegramLink
 from src.schemas.user import UserAddRequest, UserAdd
 from src.services.base import BaseService
-
+from src.init import redis_conn as r
 
 class Auth(BaseService):
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -54,7 +56,24 @@ class Auth(BaseService):
             raise UserNotFoundException
         if not self.verify_password(plain_password=data.password, hashed_password=user.hashed_password):
             raise IncorrectUserDataException
-        return self.create_access_token({"user_id": user.id})
+        access = self.create_access_token({"user_id": user.id})
+        refresh = self.create_access_token({"user_id": user.id})
+        await r.set(f"refresh:{user.id}", refresh, expire=2592000)
+        return {"access": access, "refresh": refresh}
+
+    async def refresh_access_token(self, refresh: str):
+        if not refresh:
+            raise NoRefreshToken
+        try:
+            payload = jwt.decode(refresh, settings.JWT_KEY, algorithms=settings.ALGORITHM)
+        except (DecodeError, ExpiredSignatureError):
+            raise InvalidTokenException
+        user_id = payload.get("user_id")
+        if not user_id:
+            raise InvalidTokenException
+        await r.get(f"refresh:{user_id}")
+        access = self.create_access_token({"user_id": user_id})
+        return access
 
     async def telegram_link(self, user: int):
         code = generate_code()
@@ -62,3 +81,5 @@ class Auth(BaseService):
         await self.db.tg.add(data)
         await self.db.commit()
         return code
+
+

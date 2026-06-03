@@ -13,5 +13,17 @@ BOOK_TOOLS = [
                 }
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_loans",
+            "description": "Get loans in library",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                }
+            }
+        }
     }
 ]

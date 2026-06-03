@@ -32,3 +32,15 @@ class LoansService(BaseService):
         except ObjectNotFoundException:
             raise LoanNotFound
         return loan_data
+
+    async def get_user_loans_by_telegram_id(
+            self,
+            telegram_id: int,
+        ):
+        user = await self.db.user.get_one(
+            telegram_id=telegram_id
+        )
+
+        return await self.db.loan.get_filter_by(
+            user_id=user.id
+        )

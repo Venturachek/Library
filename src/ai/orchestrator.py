@@ -1,15 +1,14 @@
 import json
-import redis.asyncio as redis
+from src.init import redis_conn as r
 from src.ai.ai_client import client
 from src.ai.registry import TOOLS_MAP
 from src.ai.tools_schema import BOOK_TOOLS
-from src.config import settings
 
 
 SYSTEM_PROMPT = """
 YOU ARE LIBRARY ASSISTANT. USE TOOLS WHEN NEEDED
 """
-r = redis.from_url(settings.redis_url)
+
 class AIOrchestrator:
     def __init__(self, tg_id: int):
         self.tg_id = tg_id
@@ -49,10 +48,16 @@ class AIOrchestrator:
                 function_name = tool_call.function.name
                 arguments = json.loads(tool_call.function.arguments)
 
-                try:
-                    result = await TOOLS_MAP[function_name](**arguments)
-                except Exception as e:
-                    result = {"error": str(e)}
+                if function_name == "get_loans":
+                    try:
+                        result = await TOOLS_MAP[function_name](tg_id=self.tg_id, **arguments)
+                    except Exception as e:
+                        result = {"error": str(e)}
+                else:
+                    try:
+                        result = await TOOLS_MAP[function_name](**arguments)
+                    except Exception as e:
+                        result = {"error": str(e)}
 
                 messages.append({
                     "role": "tool",

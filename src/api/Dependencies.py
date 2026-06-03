@@ -35,6 +35,7 @@ def get_current_user(token: str = Depends(get_token)):
 async def get_user_by_id(db: DBDep, user_id: int = Depends(get_current_user)):
     return await db.user.get_one(id=user_id)
 
+
 def get_role(role: Role):
     def checker(user = Depends(get_user_by_id)):
         if user.role != role:

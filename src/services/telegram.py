@@ -13,7 +13,6 @@ class TelegramService(BaseService):
             tg_code = await self.db.tg.get_one(code=code)
         except ObjectNotFoundException:
             raise NoSuchCodeException
-        print(tg_code)
         if tg_code.expires_at < datetime.now(timezone.utc):
             raise CodeExpiredException
         if tg_code.used:

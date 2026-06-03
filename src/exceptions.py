@@ -41,3 +41,9 @@ class NoSuchCodeException(LoanException):
 
 class CodeAlreadyUsedException(LoanException):
     detail = "Code Already Used"
+
+class InvalidTokenException(LoanException):
+    detail = "Invalid Token"
+
+class NoRefreshToken(LoanException):
+    detail = "No refresh Token"

@@ -1,5 +1,7 @@
-from src.ai.tools.tools import search_books
+from src.ai.tools.book import BookTools
+from src.ai.tools.loan import LoanTools
 
 TOOLS_MAP = {
-    "search_books": search_books,
+    "search_books": BookTools().search_books,
+    "get_loans": LoanTools().get_my_loan,
 }

@@ -1,4 +1,6 @@
 from src.models.book import Genre
+
+
 async def test_books_crud(login_client):
     _post = await login_client.post("/books", json={"title": "IT", "author": "Stephen King", "genre": Genre.HORROR, "price": 4})
     assert _post.status_code == 200
