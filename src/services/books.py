@@ -7,7 +7,7 @@ from src.services.base import BaseService
 class BooksService(BaseService):
     async def get_books(
             self,
-            pag: PaginationParams | None = None,
+            pag: PaginationParams,
             title: str | None = None,
             author: str | None = None,
             genre: Genre | None = None,

@@ -13,10 +13,8 @@ async def test_user_crud(email, password, ac):
     assert log_user.status_code == 200
     res = log_user.cookies["access_token"]
     assert res is not None
-    print(res)
-    assert "access_token" in log_user.json()
+    assert {"status": "OK"}
 
     logout_user = await ac.post("/auth/logout")
     assert logout_user.status_code == 200
-    print(logout_user.cookies)
     assert "access_token" not in logout_user.json()

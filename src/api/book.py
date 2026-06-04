@@ -27,7 +27,7 @@ async def insert_bulk_books(db: DBDep, data: list[AddBook] = Body()):
 @cache(expire=20, namespace="books")
 async def get_books(
         db: DBDep,
-        pag = None,
+        pag: PaginationDep,
         title: str | None = Query(None),
         author: str | None = Query(None),
         genre: Genre | None = Query(None),

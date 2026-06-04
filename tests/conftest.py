@@ -1,5 +1,7 @@
 import json
 from typing import AsyncGenerator
+from unittest.mock import AsyncMock
+
 import pytest
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.inmemory import InMemoryBackend
@@ -13,7 +15,7 @@ from src.models.user import Role
 from src.schemas.books import AddBook
 from src.schemas.user import UserRole
 from src.utils.dbmanager import DBManager
-
+from src.init import redis_conn as r
 
 @pytest.fixture(scope="function")
 async def db() -> AsyncGenerator[DBManager]:
@@ -26,6 +28,13 @@ async def get_db_null_pull():
         yield db
 
 app.dependency_overrides[get_db] = get_db_null_pull
+
+@pytest.fixture(scope="session", autouse=True)
+async def mock_redis():
+    r.redis = AsyncMock()
+    yield
+    r.redis = None
+
 
 @pytest.fixture(scope="session", autouse=True)
 async def async_main():

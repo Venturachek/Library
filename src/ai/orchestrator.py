@@ -21,7 +21,7 @@ class AIOrchestrator:
         return json.loads(data)
 
     async def save_messages(self, messages: list):
-        await r.set(self.key, json.dumps(messages, ensure_ascii=False), ex=60*60*24)
+        await r.set(self.key, json.dumps(messages, ensure_ascii=False), expire=60*60*24)
 
     async def ask(self, text: str):
         messages = await self.get_messages()

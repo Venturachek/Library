@@ -71,7 +71,9 @@ class Auth(BaseService):
         user_id = payload.get("user_id")
         if not user_id:
             raise InvalidTokenException
-        await r.get(f"refresh:{user_id}")
+        token = await r.get(f"refresh:{user_id}")
+        if not token:
+            raise InvalidTokenException
         access = self.create_access_token({"user_id": user_id})
         return access
 
